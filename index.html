@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>BLOK RUNTUH — Susun Balok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#1a1233;
+    --bg-panel:#241a42;
+    --line:#3a2a63;
+    --cream:#f2ecd8;
+    --amber:#ffb545;
+    --pink:#ff5d8f;
+    --teal:#37e0c4;
+    --violet:#9b6bff;
+    --lime:#c6ff5e;
+    --danger:#ff4d5e;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    background:
+      radial-gradient(circle at 15% 10%, #2a1c52 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, #1f1740 0%, transparent 50%),
+      var(--bg-deep);
+    font-family:'Baloo 2', sans-serif;
+    color:var(--cream);
+    overflow-x:hidden;
+    overscroll-behavior:none;
+    touch-action:none;
+  }
+  .mono{font-family:'Space Mono', monospace;}
+
+  #app{
+    max-width:520px;
+    margin:0 auto;
+    min-height:100vh;
+    padding:18px 16px 40px;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+  }
+  #app.show{ display:flex; }
+
+  #topbar{
+    width:100%;
+    max-width:420px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:6px;
+    font-size:0.75rem;
+    opacity:0.7;
+  }
+  .mini-btn{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--cream);
+    border-radius:8px;
+    padding:4px 10px;
+    font-family:'Baloo 2',sans-serif;
+    font-size:0.72rem;
+    cursor:pointer;
+  }
+
+  .auth-overlay{
+    position:fixed;inset:0;
+    background:
+      radial-gradient(circle at 15% 10%, #2a1c52 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, #1f1740 0%, transparent 50%),
+      var(--bg-deep);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1200;
+    padding:20px;
+  }
+  .auth-overlay.show{ display:flex; }
+  .auth-card{
+    background:var(--bg-panel);
+    border:3px solid var(--violet);
+    border-radius:20px;
+    padding:26px 22px;
+    max-width:320px;
+    width:100%;
+    box-shadow:0 12px 0 rgba(0,0,0,0.35);
+  }
+  .admin-card{ max-width:360px; border-color:var(--amber); }
+  .auth-title{
+    text-align:center;
+    font-size:1.4rem;
+    font-weight:800;
+    margin:0 0 14px;
+    text-shadow:2px 2px 0 var(--pink);
+  }
+  .auth-tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom:14px;
+    background:rgba(0,0,0,0.2);
+    border-radius:12px;
+    padding:4px;
+  }
+  .auth-tab{
+    flex:1;
+    background:none;
+    border:none;
+    color:var(--cream);
+    opacity:0.6;
+    padding:8px;
+    border-radius:9px;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .auth-tab.active{ background:var(--violet); opacity:1; }
+  .auth-form{ display:flex; flex-direction:column; gap:10px; }
+  .auth-input{
+    background:rgba(0,0,0,0.25);
+    border:2px solid var(--line);
+    border-radius:10px;
+    padding:10px 12px;
+    color:var(--cream);
+    font-family:'Space Mono',monospace;
+    font-size:0.9rem;
+  }
+  .auth-input:focus{ outline:none; border-color:var(--teal); }
+  .auth-error{
+    color:var(--danger);
+    font-size:0.78rem;
+    min-height:16px;
+    margin:0;
+  }
+  .auth-divider{
+    text-align:center;
+    margin:16px 0 10px;
+    opacity:0.5;
+    font-size:0.75rem;
+    position:relative;
+  }
+  .social-btn{
+    width:100%;
+    border:none;
+    border-radius:10px;
+    padding:10px;
+    margin-top:8px;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    cursor:pointer;
+    color:#20241a;
+  }
+  .social-btn.google{ background:#ffffff; color:#3c3c3c; }
+  .social-btn.facebook{ background:#4267B2; color:#fff; }
+  .auth-note{
+    font-size:0.68rem;
+    opacity:0.55;
+    text-align:center;
+    margin-top:12px;
+    line-height:1.4;
+  }
+  .user-list{
+    max-height:260px;
+    overflow-y:auto;
+    margin:12px 0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .user-row{
+    background:rgba(0,0,0,0.2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    font-size:0.8rem;
+  }
+  .user-info{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    word-break:break-all;
+  }
+  .dot{
+    width:9px;height:9px;
+    border-radius:50%;
+    background:#666;
+    flex-shrink:0;
+  }
+  .dot.online{
+    background:var(--lime);
+    box-shadow:0 0 6px var(--lime);
+  }
+  .user-actions{
+    display:flex;
+    gap:6px;
+    align-items:center;
+  }
+  .score-input{
+    width:64px;
+    background:rgba(0,0,0,0.3);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--cream);
+    font-family:'Space Mono',monospace;
+    padding:5px 6px;
+    font-size:0.75rem;
+  }
+  .user-row button{
+    background:var(--amber);
+    border:none;
+    border-radius:8px;
+    padding:5px 9px;
+    font-size:0.68rem;
+    font-weight:700;
+    cursor:pointer;
+    color:#2a1c00;
+    white-space:nowrap;
+  }
+  .user-row .reset-pass-btn{ background:var(--violet); color:#fff; }
+
+  header{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:14px;
+  }
+  .title-block h1{
+    font-size:1.7rem;
+    font-weight:800;
+    margin:0;
+    letter-spacing:0.5px;
+    color:var(--cream);
+    text-shadow:3px 3px 0 var(--pink);
+  }
+  .title-block p{
+    margin:2px 0 0;
+    font-size:0.72rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--teal);
+    opacity:0.85;
+  }
+
+  .stats{
+    display:flex;
+    gap:10px;
+  }
+  .stat-pill{
+    background:var(--bg-panel);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:6px 12px;
+    text-align:center;
+    min-width:64px;
+  }
+  .stat-pill .num{
+    font-size:1.1rem;
+    font-weight:700;
+    display:block;
+    color:var(--amber);
+  }
+  .stat-pill .lab{
+    font-size:0.58rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    opacity:0.7;
+  }
+
+  #board-wrap{
+    position:relative;
+    width:100%;
+    max-width:420px;
+    aspect-ratio:1/1;
+    background:var(--bg-panel);
+    border:3px solid var(--line);
+    border-radius:16px;
+    padding:8px;
+    box-shadow:0 10px 0 rgba(0,0,0,0.25), inset 0 0 40px rgba(0,0,0,0.3);
+  }
+  #board{
+    width:100%;
+    height:100%;
+    display:grid;
+    gap:3px;
+    position:relative;
+  }
+  .cell{
+    background:rgba(255,255,255,0.04);
+    border-radius:6px;
+    position:relative;
+    transition:background 0.15s;
+  }
+  .cell.filled{
+    border-radius:8px;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.25), inset 0 3px 0 rgba(255,255,255,0.35);
+  }
+  .cell.ghost-ok{
+    background:rgba(198,255,94,0.35) !important;
+    box-shadow:inset 0 0 0 2px var(--lime);
+  }
+  .cell.ghost-bad{
+    background:rgba(255,77,94,0.25) !important;
+    box-shadow:inset 0 0 0 2px var(--danger);
+  }
+  .cell.clearing{
+    animation:pop 0.32s ease forwards;
+  }
+  @keyframes pop{
+    0%{transform:scale(1);opacity:1;}
+    60%{transform:scale(1.18);opacity:0.8;}
+    100%{transform:scale(0.2);opacity:0;}
+  }
+
+  #combo-msg{
+    position:absolute;
+    top:-6px;left:50%;
+    transform:translateX(-50%);
+    font-weight:800;
+    font-size:1rem;
+    color:var(--lime);
+    text-shadow:2px 2px 0 rgba(0,0,0,0.4);
+    opacity:0;
+    pointer-events:none;
+  }
+  #combo-msg.show{
+    animation:float-up 0.9s ease forwards;
+  }
+  @keyframes float-up{
+    0%{opacity:0; transform:translate(-50%,10px) scale(0.8);}
+    20%{opacity:1; transform:translate(-50%,-10px) scale(1.1);}
+    100%{opacity:0; transform:translate(-50%,-40px) scale(1);}
+  }
+
+  #tray{
+    width:100%;
+    max-width:420px;
+    margin-top:16px;
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .piece-slot{
+    flex:1;
+    background:var(--bg-panel);
+    border:2px solid var(--line);
+    border-radius:14px;
+    min-height:92px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    touch-action:none;
+  }
+  .piece-slot.empty{opacity:0.35;}
+  .piece-grid{
+    display:grid;
+    gap:3px;
+  }
+  .piece-cell{
+    width:18px;height:18px;
+    border-radius:5px;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.35);
+  }
+  .piece-cell.empty-sub{visibility:hidden;}
+
+  .dragging{
+    position:fixed;
+    pointer-events:none;
+    z-index:999;
+    display:grid;
+    gap:4px;
+    opacity:0.95;
+  }
+  .dragging .piece-cell{
+    width:38px;height:38px;
+    border-radius:8px;
+  }
+
+  #footer-note{
+    margin-top:18px;
+    font-size:0.72rem;
+    opacity:0.55;
+    text-align:center;
+    letter-spacing:0.3px;
+  }
+
+  #overlay{
+    position:fixed;inset:0;
+    background:rgba(15,10,30,0.88);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:20px;
+  }
+  #overlay.show{display:flex;}
+  .modal{
+    background:var(--bg-panel);
+    border:3px solid var(--violet);
+    border-radius:20px;
+    padding:28px 24px;
+    text-align:center;
+    max-width:320px;
+    box-shadow:0 12px 0 rgba(0,0,0,0.35);
+  }
+  .modal h2{
+    margin:0 0 6px;
+    font-size:1.5rem;
+    color:var(--pink);
+  }
+  .modal p{margin:4px 0;font-size:0.9rem;opacity:0.85;}
+  .modal .big{font-size:2.2rem;font-weight:800;color:var(--amber);margin:8px 0;}
+  .btn{
+    margin-top:16px;
+    background:var(--lime);
+    color:#20241a;
+    border:none;
+    border-radius:12px;
+    padding:12px 26px;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:1rem;
+    cursor:pointer;
+    box-shadow:0 5px 0 #7ea832;
+  }
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 #7ea832;}
+
+  #level-banner{
+    position:fixed;
+    top:40%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(0.7);
+    font-size:2.4rem;
+    font-weight:800;
+    color:var(--amber);
+    text-shadow:4px 4px 0 var(--pink);
+    opacity:0;
+    z-index:900;
+    pointer-events:none;
+  }
+  #level-banner.show{
+    animation:levelpop 1.3s ease forwards;
+  }
+  @keyframes levelpop{
+    0%{opacity:0; transform:translate(-50%,-50%) scale(0.5);}
+    25%{opacity:1; transform:translate(-50%,-50%) scale(1.15);}
+    40%{transform:translate(-50%,-50%) scale(1);}
+    80%{opacity:1;}
+    100%{opacity:0; transform:translate(-50%,-60%) scale(1);}
+  }
+</style>
+</head>
+<body>
+<div id="auth-overlay" class="auth-overlay">
+  <div class="auth-card">
+    <h1 class="auth-title">BLOK RUNTUH</h1>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Masuk</button>
+      <button class="auth-tab" data-tab="register">Daftar</button>
+    </div>
+
+    <div id="tab-login" class="auth-form">
+      <input type="email" id="login-email" placeholder="Email" class="auth-input">
+      <input type="password" id="login-pass" placeholder="Sandi" class="auth-input">
+      <button class="btn" id="login-btn">Masuk</button>
+      <p class="auth-error" id="login-error"></p>
+    </div>
+
+    <div id="tab-register" class="auth-form" style="display:none">
+      <input type="email" id="reg-email" placeholder="Email" class="auth-input">
+      <input type="password" id="reg-pass" placeholder="Buat Sandi" class="auth-input">
+      <button class="btn" id="reg-btn">Daftar</button>
+      <p class="auth-error" id="reg-error"></p>
+    </div>
+
+    <div class="auth-divider"><span>atau</span></div>
+    <button class="social-btn google" id="google-btn">Lanjutkan dengan Google</button>
+    <button class="social-btn facebook" id="fb-btn">Lanjutkan dengan Facebook</button>
+    <p class="auth-note">Login sosial butuh koneksi server & pendaftaran resmi ke penyedia — belum aktif di versi ini.</p>
+  </div>
+</div>
+
+<div id="admin-overlay" class="auth-overlay">
+  <div class="auth-card admin-card">
+    <h1 class="auth-title">Panel Admin</h1>
+    <p class="auth-note">Masuk sebagai <b id="admin-email-label"></b></p>
+    <div id="user-list" class="user-list"></div>
+    <button class="btn" id="admin-logout-btn">Keluar</button>
+  </div>
+</div>
+
+<div id="app">
+  <div id="topbar">
+    <span id="whoami"></span>
+    <button id="logout-btn" class="mini-btn">Keluar</button>
+  </div>
+  <header>
+    <div class="title-block">
+      <h1>BLOK RUNTUH</h1>
+      <p>Susun &amp; Hancurkan</p>
+    </div>
+    <div class="stats">
+      <div class="stat-pill">
+        <span class="num mono" id="score-val">0</span>
+        <span class="lab">Skor</span>
+      </div>
+      <div class="stat-pill">
+        <span class="num mono" id="level-val">1</span>
+        <span class="lab">Level</span>
+      </div>
+      <div class="stat-pill">
+        <span class="num mono" id="best-val">0</span>
+        <span class="lab">Terbaik</span>
+      </div>
+    </div>
+  </header>
+
+  <div id="board-wrap">
+    <div id="board"></div>
+    <div id="combo-msg"></div>
+  </div>
+
+  <div id="tray"></div>
+
+  <p id="footer-note">Seret balok ke papan. Penuhi satu baris atau kolom untuk menghancurkannya.</p>
+</div>
+
+<div id="level-banner"></div>
+
+<div id="overlay">
+  <div class="modal">
+    <h2>Papan Penuh!</h2>
+    <p>Tidak ada lagi tempat untuk balok yang tersisa.</p>
+    <div class="big mono" id="final-score">0</div>
+    <p>Level dicapai: <b id="final-level">1</b></p>
+    <button class="btn" id="restart-btn">Main Lagi</button>
+  </div>
+</div>
+
+<script>
+// ===== AUDIO: efek suara sintetis (tak perlu file suara eksternal) =====
+const SFX = (function(){
+  let ctx = null;
+  function getCtx(){
+    if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    return ctx;
+  }
+  function tone(freq, start, dur, type='sine', vol=0.25){
+    const ac = getCtx();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ac.currentTime + start);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + start + dur);
+    osc.connect(gain).connect(ac.destination);
+    osc.start(ac.currentTime + start);
+    osc.stop(ac.currentTime + start + dur + 0.02);
+  }
+  function place(){ tone(520, 0, 0.08, 'square', 0.15); }
+  function pickUp(){ tone(340, 0, 0.05, 'square', 0.1); }
+  function invalid(){ tone(120, 0, 0.15, 'sawtooth', 0.15); }
+  function clear1(){ tone(660,0,0.12); tone(880,0.08,0.15); }
+  function clear2(){ tone(660,0,0.1); tone(880,0.08,0.1); tone(1046,0.16,0.2); }
+  function clear3(){ tone(523,0,0.09); tone(659,0.07,0.09); tone(784,0.14,0.09); tone(1046,0.21,0.25); }
+  function clearMega(){ tone(523,0,0.08); tone(659,0.06,0.08); tone(784,0.12,0.08); tone(988,0.18,0.08); tone(1318,0.24,0.35); }
+  function gameOver(){ tone(300,0,0.2,'sawtooth',0.2); tone(200,0.2,0.3,'sawtooth',0.2); }
+  function levelUp(){ tone(784,0,0.1); tone(988,0.1,0.1); tone(1318,0.2,0.25); }
+
+  function announce(text){
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = 1.05;
+    u.pitch = 0.75;
+    u.volume = 1;
+    speechSynthesis.speak(u);
+  }
+
+  return { place, pickUp, invalid, clear1, clear2, clear3, clearMega, gameOver, levelUp, announce };
+})();
+
+// ===== AUTH: login/daftar lokal + admin =====
+const Auth = (function(){
+  const ADMIN_EMAIL = 'chokess02@gmail.com';
+  const ADMIN_PASS = 'hari02';
+  const USERS_KEY = 'blokruntuh_users';
+  const SESSION_KEY = 'blokruntuh_session';
+
+  async function hash(str){
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function getUsers(){
+    try{ return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); }
+    catch(e){ return {}; }
+  }
+  function saveUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+
+  function normalizeRecord(rec){
+    if(typeof rec === 'string') return { hash: rec, bestScore: 0, lastSeen: 0 };
+    return { hash: rec.hash, bestScore: rec.bestScore || 0, lastSeen: rec.lastSeen || 0 };
+  }
+
+  async function register(email, pass){
+    email = email.trim().toLowerCase();
+    if(!email || !pass) return { ok:false, msg:'Isi email dan sandi.' };
+    if(pass.length < 4) return { ok:false, msg:'Sandi minimal 4 karakter.' };
+    if(email === ADMIN_EMAIL) return { ok:false, msg:'Email ini tidak bisa dipakai daftar.' };
+    const users = getUsers();
+    if(users[email]) return { ok:false, msg:'Email sudah terdaftar.' };
+    users[email] = { hash: await hash(pass), bestScore: 0, lastSeen: 0 };
+    saveUsers(users);
+    return { ok:true };
+  }
+
+  async function login(email, pass){
+    email = email.trim().toLowerCase();
+    if(email === ADMIN_EMAIL && pass === ADMIN_PASS){
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ email, role:'admin' }));
+      return { ok:true, role:'admin' };
+    }
+    const users = getUsers();
+    if(!users[email]) return { ok:false, msg:'Email belum terdaftar.' };
+    const rec = normalizeRecord(users[email]);
+    const h = await hash(pass);
+    if(h !== rec.hash) return { ok:false, msg:'Sandi salah.' };
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ email, role:'user' }));
+    return { ok:true, role:'user' };
+  }
+
+  function currentSession(){
+    try{ return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); }
+    catch(e){ return null; }
+  }
+  function logout(){ sessionStorage.removeItem(SESSION_KEY); }
+
+  async function resetUserPassword(email, newPass){
+    const users = getUsers();
+    if(!users[email]) return false;
+    const rec = normalizeRecord(users[email]);
+    rec.hash = await hash(newPass);
+    users[email] = rec;
+    saveUsers(users);
+    return true;
+  }
+
+  function updateHeartbeat(email){
+    const users = getUsers();
+    if(!users[email]) return;
+    const rec = normalizeRecord(users[email]);
+    rec.lastSeen = Date.now();
+    users[email] = rec;
+    saveUsers(users);
+  }
+
+  function setUserScore(email, score){
+    const users = getUsers();
+    if(!users[email]) return;
+    const rec = normalizeRecord(users[email]);
+    if(score > rec.bestScore) rec.bestScore = score;
+    users[email] = rec;
+    saveUsers(users);
+  }
+
+  function adminSetScore(email, score){
+    const users = getUsers();
+    if(!users[email]) return false;
+    const rec = normalizeRecord(users[email]);
+    rec.bestScore = score;
+    users[email] = rec;
+    saveUsers(users);
+    return true;
+  }
+
+  function getRecord(email){
+    const users = getUsers();
+    if(!users[email]) return null;
+    return normalizeRecord(users[email]);
+  }
+
+  return { register, login, currentSession, logout, getUsers, resetUserPassword, updateHeartbeat, setUserScore, adminSetScore, getRecord, ADMIN_EMAIL };
+})();
+
+let currentUserEmail = null;
+
+(function initAuthUI(){
+  const authOverlay = document.getElementById('auth-overlay');
+  const adminOverlay = document.getElementById('admin-overlay');
+  const appEl = document.getElementById('app');
+  const tabs = document.querySelectorAll('.auth-tab');
+  const tabLogin = document.getElementById('tab-login');
+  const tabRegister = document.getElementById('tab-register');
+
+  tabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const which = tab.dataset.tab;
+      tabLogin.style.display = which === 'login' ? 'flex' : 'none';
+      tabRegister.style.display = which === 'register' ? 'flex' : 'none';
+    });
+  });
+
+  document.getElementById('login-btn').addEventListener('click', async ()=>{
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+    const res = await Auth.login(email, pass);
+    if(!res.ok){ errEl.textContent = res.msg; return; }
+    enterApp(res.role, email.trim().toLowerCase());
+  });
+
+  document.getElementById('reg-btn').addEventListener('click', async ()=>{
+    const email = document.getElementById('reg-email').value;
+    const pass = document.getElementById('reg-pass').value;
+    const errEl = document.getElementById('reg-error');
+    errEl.textContent = '';
+    const res = await Auth.register(email, pass);
+    if(!res.ok){ errEl.textContent = res.msg; return; }
+    const loginRes = await Auth.login(email, pass);
+    enterApp(loginRes.role, email.trim().toLowerCase());
+  });
+
+  document.getElementById('google-btn').addEventListener('click', ()=>{
+    alert('Login Google asli butuh server & pendaftaran resmi ke Google Developer Console. Silakan pakai Email/Sandi dulu.');
+  });
+  document.getElementById('fb-btn').addEventListener('click', ()=>{
+    alert('Login Facebook asli butuh server & pendaftaran resmi ke Facebook Developer Console. Silakan pakai Email/Sandi dulu.');
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', ()=>{
+    Auth.logout();
+    location.reload();
+  });
+  document.getElementById('admin-logout-btn').addEventListener('click', ()=>{
+    Auth.logout();
+    location.reload();
+  });
+
+  let adminRefreshTimer = null;
+
+  function renderAdminList(){
+    const listEl = document.getElementById('user-list');
+    const users = Auth.getUsers();
+    const emails = Object.keys(users);
+    listEl.innerHTML = '';
+    if(emails.length === 0){
+      listEl.innerHTML = '<p class="auth-note">Belum ada pengguna terdaftar di HP ini.</p>';
+      return;
+    }
+    const now = Date.now();
+    emails.forEach(email=>{
+      const rec = Auth.getRecord(email);
+      const isOnline = rec.lastSeen && (now - rec.lastSeen < 15000);
+      const row = document.createElement('div');
+      row.className = 'user-row';
+      row.innerHTML = `
+        <div class="user-info">
+          <span class="dot ${isOnline ? 'online' : ''}"></span>
+          <span>${email}</span>
+        </div>
+        <div class="user-actions">
+          <input type="number" class="score-input" value="${rec.bestScore}" />
+          <button class="set-score-btn">Set Skor</button>
+          <button class="reset-pass-btn">Reset Sandi</button>
+        </div>`;
+      row.querySelector('.set-score-btn').addEventListener('click', async ()=>{
+        const val = parseInt(row.querySelector('.score-input').value, 10) || 0;
+        await Auth.adminSetScore(email, val);
+        alert('Skor ' + email + ' diubah jadi ' + val);
+        renderAdminList();
+      });
+      row.querySelector('.reset-pass-btn').addEventListener('click', async ()=>{
+        const np = prompt('Sandi baru untuk ' + email + ' (min 4 karakter):');
+        if(np && np.length >= 4){
+          await Auth.resetUserPassword(email, np);
+          alert('Sandi ' + email + ' berhasil direset.');
+        }
+      });
+      listEl.appendChild(row);
+    });
+  }
+
+  function enterApp(role, email){
+    authOverlay.classList.remove('show');
+    if(role === 'admin'){
+      document.getElementById('admin-email-label').textContent = email;
+      renderAdminList();
+      adminOverlay.classList.add('show');
+      if(adminRefreshTimer) clearInterval(adminRefreshTimer);
+      adminRefreshTimer = setInterval(renderAdminList, 5000);
+    } else {
+      currentUserEmail = email;
+      document.getElementById('whoami').textContent = email;
+      appEl.classList.add('show');
+      Auth.updateHeartbeat(email);
+      setInterval(()=> Auth.updateHeartbeat(email), 5000);
+    }
+  }
+
+  const session = Auth.currentSession();
+  if(session){
+    enterApp(session.role, session.email);
+  } else {
+    authOverlay.classList.add('show');
+  }
+})();
+
+(function(){
+  const SIZE = 8;
+  const COLORS = ['#ff5d8f','#ffb545','#37e0c4','#9b6bff','#c6ff5e','#ff8a5c'];
+  const boardEl = document.getElementById('board');
+  const trayEl = document.getElementById('tray');
+  const scoreEl = document.getElementById('score-val');
+  const levelEl = document.getElementById('level-val');
+  const bestEl = document.getElementById('best-val');
+  const comboMsg = document.getElementById('combo-msg');
+  const overlay = document.getElementById('overlay');
+  const finalScoreEl = document.getElementById('final-score');
+  const finalLevelEl = document.getElementById('final-level');
+  const levelBanner = document.getElementById('level-banner');
+  const restartBtn = document.getElementById('restart-btn');
+
+  boardEl.style.gridTemplateColumns = `repeat(${SIZE}, 1fr)`;
+  boardEl.style.gridTemplateRows = `repeat(${SIZE}, 1fr)`;
+
+  // shape library: arrays of [r,c] offsets
+  const SHAPES = [
+    [[0,0]], // single
+    [[0,0],[0,1]], [[0,0],[1,0]], // domino
+    [[0,0],[0,1],[0,2]], [[0,0],[1,0],[2,0]], // tromino line
+    [[0,0],[0,1],[1,0]], [[0,0],[0,1],[1,1]], [[0,0],[1,0],[1,1]], [[0,0],[1,0],[1,-1]].map(p=>[p[0],p[1]+1]), // trominos L
+    [[0,0],[1,0],[0,1],[1,1]], // square 2x2
+    [[0,0],[0,1],[0,2],[0,3]], [[0,0],[1,0],[2,0],[3,0]], // tetromino I
+    [[0,0],[0,1],[0,2],[1,0]], [[0,0],[0,1],[0,2],[1,2]], // J/L
+    [[1,0],[1,1],[1,2],[0,0]], [[1,0],[1,1],[1,2],[0,2]],
+    [[0,0],[1,0],[2,0],[2,1]], [[0,0],[1,0],[2,0],[0,1]],
+    [[0,1],[1,0],[1,1],[1,2]], // T
+    [[0,0],[0,1],[1,1],[1,2]], [[0,1],[0,2],[1,0],[1,1]], // S/Z
+    [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]] // 3x3 big square (rare, high level)
+  ];
+
+  let grid = []; // grid[r][c] = color or null
+  let cellEls = [];
+  let score = 0;
+  let level = 1;
+  let best = parseInt(localStorage.getItem('blokruntuh_best')||'0', 10) || 0;
+  let tray = []; // {shape, color, used}
+  let dragState = null;
+  let gameOver = false;
+
+  bestEl.textContent = best;
+
+  function initBoard(){
+    grid = Array.from({length:SIZE}, () => Array(SIZE).fill(null));
+    boardEl.innerHTML = '';
+    cellEls = [];
+    for(let r=0;r<SIZE;r++){
+      const row = [];
+      for(let c=0;c<SIZE;c++){
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.dataset.r = r;
+        div.dataset.c = c;
+        boardEl.appendChild(div);
+        row.push(div);
+      }
+      cellEls.push(row);
+    }
+  }
+
+  function randomShape(){
+    // higher level -> slightly more complex shapes allowed, but always mix in simple ones
+    const pool = level >= 4 ? SHAPES : SHAPES.slice(0, SHAPES.length-1);
+    return pool[Math.floor(Math.random()*pool.length)];
+  }
+
+  function normalize(shape){
+    const minR = Math.min(...shape.map(p=>p[0]));
+    const minC = Math.min(...shape.map(p=>p[1]));
+    return shape.map(([r,c])=>[r-minR, c-minC]);
+  }
+
+  function makePieces(){
+    tray = [0,1,2].map(()=>({
+      shape: normalize(randomShape()),
+      color: COLORS[Math.floor(Math.random()*COLORS.length)],
+      used: false
+    }));
+    renderTray();
+  }
+
+  function renderTray(){
+    trayEl.innerHTML = '';
+    tray.forEach((piece, idx)=>{
+      const slot = document.createElement('div');
+      slot.className = 'piece-slot' + (piece.used ? ' empty' : '');
+      if(!piece.used){
+        const maxR = Math.max(...piece.shape.map(p=>p[0]))+1;
+        const maxC = Math.max(...piece.shape.map(p=>p[1]))+1;
+        const pg = document.createElement('div');
+        pg.className = 'piece-grid';
+        pg.style.gridTemplateColumns = `repeat(${maxC}, 18px)`;
+        pg.style.gridTemplateRows = `repeat(${maxR}, 18px)`;
+        for(let r=0;r<maxR;r++){
+          for(let c=0;c<maxC;c++){
+            const cell = document.createElement('div');
+            const has = piece.shape.some(p=>p[0]===r && p[1]===c);
+            cell.className = 'piece-cell' + (has ? '' : ' empty-sub');
+            if(has) cell.style.background = piece.color;
+            pg.appendChild(cell);
+          }
+        }
+        slot.appendChild(pg);
+        slot.addEventListener('pointerdown', (e)=> startDrag(e, idx));
+      }
+      trayEl.appendChild(slot);
+    });
+  }
+
+  function startDrag(e, idx){
+    if(gameOver || tray[idx].used) return;
+    e.preventDefault();
+    SFX.pickUp();
+    const piece = tray[idx];
+    const maxC = Math.max(...piece.shape.map(p=>p[1]))+1;
+    const maxR = Math.max(...piece.shape.map(p=>p[0]))+1;
+
+    const dragEl = document.createElement('div');
+    dragEl.className = 'dragging';
+    dragEl.style.gridTemplateColumns = `repeat(${maxC}, 38px)`;
+    dragEl.style.gridTemplateRows = `repeat(${maxR}, 38px)`;
+    for(let r=0;r<maxR;r++){
+      for(let c=0;c<maxC;c++){
+        const cell = document.createElement('div');
+        const has = piece.shape.some(p=>p[0]===r && p[1]===c);
+        cell.className = 'piece-cell' + (has ? '' : ' empty-sub');
+        if(has) cell.style.background = piece.color;
+        dragEl.appendChild(cell);
+      }
+    }
+    document.body.appendChild(dragEl);
+
+    dragState = { idx, piece, el: dragEl, maxR, maxC };
+    moveDrag(e.clientX, e.clientY);
+
+    window.addEventListener('pointermove', onDragMove);
+    window.addEventListener('pointerup', onDragEnd);
+  }
+
+  function onDragMove(e){ moveDrag(e.clientX, e.clientY); }
+
+  function boardRect(){ return boardEl.getBoundingClientRect(); }
+
+  function moveDrag(x, y){
+    if(!dragState) return;
+    const { el, maxR, maxC } = dragState;
+    const offsetY = 90; // lift piece above finger so it's visible
+    el.style.left = (x - (maxC*38)/2) + 'px';
+    el.style.top = (y - (maxR*38) - offsetY + (maxR*38)/2) + 'px';
+
+    // compute target cell under the lifted position
+    const rect = boardRect();
+    const cellSize = rect.width / SIZE;
+    const targetX = x - rect.left;
+    const targetY = (y - offsetY) - rect.top;
+    const baseC = Math.round(targetX/cellSize - maxC/2);
+    const baseR = Math.round(targetY/cellSize - maxR/2);
+    highlightGhost(baseR, baseC);
+  }
+
+  function clearGhost(){
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+      cellEls[r][c].classList.remove('ghost-ok','ghost-bad');
+    }
+  }
+
+  function highlightGhost(baseR, baseC){
+    clearGhost();
+    if(!dragState) return;
+    const { piece } = dragState;
+    const valid = canPlace(piece.shape, baseR, baseC);
+    piece.shape.forEach(([dr,dc])=>{
+      const r = baseR+dr, c = baseC+dc;
+      if(r>=0 && r<SIZE && c>=0 && c<SIZE){
+        cellEls[r][c].classList.add(valid ? 'ghost-ok' : 'ghost-bad');
+      }
+    });
+    dragState.lastPos = {baseR, baseC, valid};
+  }
+
+  function canPlace(shape, baseR, baseC){
+    return shape.every(([dr,dc])=>{
+      const r = baseR+dr, c = baseC+dc;
+      return r>=0 && r<SIZE && c>=0 && c<SIZE && !grid[r][c];
+    });
+  }
+
+  function onDragEnd(){
+    window.removeEventListener('pointermove', onDragMove);
+    window.removeEventListener('pointerup', onDragEnd);
+    if(!dragState) return;
+    const { piece, idx, lastPos, el } = dragState;
+    clearGhost();
+    el.remove();
+    if(lastPos && lastPos.valid){
+      SFX.place();
+      placePiece(piece, lastPos.baseR, lastPos.baseC);
+      tray[idx].used = true;
+      renderTray();
+      if(tray.every(p=>p.used)) makePieces();
+      checkGameOver();
+    } else if(lastPos){
+      SFX.invalid();
+    }
+    dragState = null;
+  }
+
+  function placePiece(piece, baseR, baseC){
+    piece.shape.forEach(([dr,dc])=>{
+      const r = baseR+dr, c = baseC+dc;
+      grid[r][c] = piece.color;
+      cellEls[r][c].classList.add('filled');
+      cellEls[r][c].style.background = piece.color;
+    });
+    score += piece.shape.length;
+    checkLines();
+    updateStats();
+  }
+
+  function checkLines(){
+    const fullRows = [];
+    const fullCols = [];
+    for(let r=0;r<SIZE;r++){
+      if(grid[r].every(v=>v)) fullRows.push(r);
+    }
+    for(let c=0;c<SIZE;c++){
+      if(grid.every(row=>row[c])) fullCols.push(c);
+    }
+    const totalLines = fullRows.length + fullCols.length;
+    if(totalLines === 0) return;
+
+    const cellsToClear = new Set();
+    fullRows.forEach(r=>{ for(let c=0;c<SIZE;c++) cellsToClear.add(r+','+c); });
+    fullCols.forEach(c=>{ for(let r=0;r<SIZE;r++) cellsToClear.add(r+','+c); });
+
+    cellsToClear.forEach(key=>{
+      const [r,c] = key.split(',').map(Number);
+      cellEls[r][c].classList.add('clearing');
+    });
+
+    const gained = totalLines * 10 * totalLines; // combo bonus
+    score += gained;
+    showCombo(totalLines, gained);
+
+    setTimeout(()=>{
+      cellsToClear.forEach(key=>{
+        const [r,c] = key.split(',').map(Number);
+        grid[r][c] = null;
+        cellEls[r][c].className = 'cell';
+        cellEls[r][c].style.background = '';
+      });
+      updateStats();
+    }, 320);
+  }
+
+  function showCombo(lines, gained){
+    const labels = {1:'HANCUR!', 2:'DOUBLE KILL!', 3:'TRIPLE KILL!', 4:'MEGA KILL!'};
+    const label = lines >= 5 ? 'SAVAGE!' : (labels[lines] || 'LUAR BIASA!');
+    comboMsg.textContent = label + ' +' + gained;
+    comboMsg.classList.remove('show');
+    void comboMsg.offsetWidth;
+    comboMsg.classList.add('show');
+
+    if(lines === 1){ SFX.clear1(); }
+    else if(lines === 2){ SFX.clear2(); SFX.announce('Double Kill'); }
+    else if(lines === 3){ SFX.clear3(); SFX.announce('Triple Kill'); }
+    else if(lines === 4){ SFX.clearMega(); SFX.announce('Mega Kill'); }
+    else { SFX.clearMega(); SFX.announce('Savage'); }
+  }
+
+  function updateStats(){
+    scoreEl.textContent = score;
+    const newLevel = Math.floor(score/300) + 1;
+    if(newLevel !== level){
+      level = newLevel;
+      levelEl.textContent = level;
+      levelBanner.textContent = 'LEVEL ' + level;
+      levelBanner.classList.remove('show');
+      void levelBanner.offsetWidth;
+      levelBanner.classList.add('show');
+      SFX.levelUp();
+    }
+    if(score > best){
+      best = score;
+      bestEl.textContent = best;
+      localStorage.setItem('blokruntuh_best', String(best));
+    }
+    if(currentUserEmail){
+      Auth.setUserScore(currentUserEmail, score);
+    }
+  }
+
+  function checkGameOver(){
+    const remaining = tray.filter(p=>!p.used);
+    const stillPossible = remaining.some(piece=>{
+      for(let r=0;r<SIZE;r++){
+        for(let c=0;c<SIZE;c++){
+          if(canPlace(piece.shape, r, c)) return true;
+        }
+      }
+      return false;
+    });
+    if(remaining.length > 0 && !stillPossible){
+      triggerGameOver();
+    }
+  }
+
+  function triggerGameOver(){
+    gameOver = true;
+    SFX.gameOver();
+    finalScoreEl.textContent = score;
+    finalLevelEl.textContent = level;
+    overlay.classList.add('show');
+  }
+
+  function restart(){
+    score = 0; level = 1; gameOver = false;
+    scoreEl.textContent = 0;
+    levelEl.textContent = 1;
+    overlay.classList.remove('show');
+    initBoard();
+    makePieces();
+  }
+
+  restartBtn.addEventListener('click', restart);
+
+  initBoard();
+  makePieces();
+})();
+</script>
+</body>
+</html>
